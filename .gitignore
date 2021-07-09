@@ -1,2 +1,4 @@
 data/
 pde/old
+.vscode
+__pycache__
