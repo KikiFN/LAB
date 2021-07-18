@@ -1,9 +1,12 @@
 import numpy as np 
 from numpy import linalg as LA
-import util.parameters as pr
+import util.parameters301 as pr
 import matplotlib.pyplot as plt
 import util.settings as stg
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Functions:
 
@@ -19,41 +22,69 @@ class Functions:
         self.deltat = (self.deltax * pr.cf) / pr.a
 
         self.x_val = np.arange(0,pr.L,self.deltax)
-        
-        self.gauss = np.exp(-np.power(self.x_val-pr.x0,2))
-    
         self.LEN = len(self.x_val)
         self.j,self.jmin,self.jmax = _indexes()
         
         self.coefficient = (pr.a*self.deltat)/(2*self.deltax)
-            
-    def get_gaussian(self):
-        return self.gauss
-    
-    def ftcs(self,v=None):
-        if v is None: v= self.get_gaussian()
-        curve = [ v[a] - (self.coefficient)*(v[b]-v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         
-        return curve
 
-    def get_norm(v,self):
+    def _get_norm(self,v):
         return LA.norm(v)/np.sqrt(pr.J)
+    
+    def _get_err(self,v):
+        return self._get_norm(v - self.get_gaussian())
+    
+    def add_to_array(self,opr_type,un,arr):
+        if opr_type == "norm": vec = self._get_norm(un)
+        if opr_type == "err": vec = self._get_err(un)
+        arr = np.append(arr,vec)
+        return arr
     
     def cartesian_plot(self,*args):
         x,y = args
         plt.plot(x,y)
-        
+
+    def ftcs(self,v=None):
+        if v is None: v= self.get_gaussian()
+        curve = [ v[a] - (self.coefficient)*(v[b]-v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+        return curve
+    
+    def get_gaussian(self,a=None,b=None):
+        if a == None and b == None:
+            a= self.x_val
+            b= pr.x0
+        return np.exp(-np.power(a-b,2))
+    
+    def initialize_arrays(self,n):
+        arr_list = []
+        for i in range(n):
+            x = np.empty(0)
+            arr_list.append(x)
+        return arr_list
+    
+    def laxfried(self,v=None):
+        if v is None: v= self.get_gaussian()
+        curve = [ (0.5*(v[a]+v[b])) - ((self.coefficient)*(v[a]-v[b])) for a,b in zip(self.jmax,self.jmin)]
+        return curve
+    
     def pre_plot(self,n):
         fig=plt.figure(n)
-
-
-    def plot(self,data):
-        plt.plot(*data)
-
+        logger.info("Pre-plotting figure number {}".format(str(n))) 
+        
+    def plot(self,args):
+        data,label= args
+        if label == "": plt.plot(*data)
+        else:
+            plt.plot(*data,label=label)
+            plt.legend(loc=0)
+        logger.info("Plotting function labeled {}".format(str(label))) 
 
     def post_plot(self,*args):
-        xlb,ylb,title,figname= args
+        appname,xlb,ylb,title,figname= args
+        figname += "_{}".format(str(pr.J))
         plt.xlabel(xlb)
         plt.ylabel(ylb)
         plt.title(title)
-        plt.savefig(os.path.join(stg.DATA_PATH, figname), dpi=100)
+        name = appname + "_" + figname
+        plt.savefig(os.path.join(stg.DATA_PATH, name), dpi=100)
+        logger.info("Post-plotting and saving figure {}".format(str(name))) 
