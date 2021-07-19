@@ -47,13 +47,12 @@ class Functions:
     def ftcs(self,v=None):
         if v is None: v= self.get_gaussian()
         curve = [ v[a] - (self.coefficient)*(v[b]-v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
-        return curve
+        return np.asarray(curve)
     
     def get_gaussian(self,a=None,b=None):
-        if a == None and b == None:
-            a= self.x_val
-            b= pr.x0
-        return np.exp(-np.power(a-b,2))
+        if a == None: a= self.x_val
+        if b == None: b= pr.x0
+        return np.exp(-np.power(a-(b),2))
     
     def initialize_arrays(self,n):
         arr_list = []
@@ -65,8 +64,13 @@ class Functions:
     def laxfried(self,v=None):
         if v is None: v= self.get_gaussian()
         curve = [ (0.5*(v[a]+v[b])) - ((self.coefficient)*(v[a]-v[b])) for a,b in zip(self.jmax,self.jmin)]
-        return curve
+        return np.asarray(curve)
     
+    def leapfrog(self,v,w=None):
+        if w is None: w= self.get_gaussian()
+        curve = [ (v[a] - ((2*self.coefficient)*(w[b]-w[c]))) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+        return np.asarray(curve)
+
     def pre_plot(self,n):
         fig=plt.figure(n)
         logger.info("Pre-plotting figure number {}".format(str(n))) 
