@@ -1,6 +1,6 @@
 import numpy as np 
 from numpy import linalg as LA
-import util.parameters301 as pr
+import util.parameters101 as pr
 import matplotlib.pyplot as plt
 import util.settings as stg
 import os
@@ -17,15 +17,13 @@ class Functions:
             b= np.roll(a,1)
             c= np.roll(a,-1)
             return a,b,c
-        
-        self.deltax = pr.L/(pr.J-1)
-        self.deltat = (self.deltax * pr.cf) / pr.a
 
-        self.x_val = np.arange(0,pr.L,self.deltax)
+        self.x_val = np.arange(0,pr.L,pr.deltax)
         self.LEN = len(self.x_val)
         self.j,self.jmin,self.jmax = _indexes()
         
-        self.coefficient = (pr.a*self.deltat)/(2*self.deltax)
+        self.coefficient = (pr.a*pr.deltat)/(2*pr.deltax)
+        self.coeff1D = (((pr.v**2)*(pr.deltat**2))/(pr.deltax**2))
         
 
     def _get_norm(self,v):
@@ -66,8 +64,13 @@ class Functions:
         curve = [ (0.5*(v[a]+v[b])) - ((self.coefficient)*(v[a]-v[b])) for a,b in zip(self.jmax,self.jmin)]
         return np.asarray(curve)
     
-    def leapfrog(self,v,w=None):
-        if w is None: w= self.get_gaussian()
+    def laxwendroff(self,v=None):
+        if v is None: v= self.get_gaussian()
+        second_coeff = (np.power(pr.a,2)*np.power(pr.deltat,2))/(2*np.power(pr.deltax,2))
+        curve = [ v[a] - ((self.coefficient)*(v[b]-v[c])) + (second_coeff)*(v[b]-(2*v[a])+v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+        return np.asarray(curve)
+    
+    def leapfrog(self,v,w):
         curve = [ (v[a] - ((2*self.coefficient)*(w[b]-w[c]))) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         return np.asarray(curve)
 
@@ -92,3 +95,11 @@ class Functions:
         name = appname + "_" + figname
         plt.savefig(os.path.join(stg.DATA_PATH, name), dpi=100)
         logger.info("Post-plotting and saving figure {}".format(str(name))) 
+        plt.close()
+        
+    def step_fun(self,v=None):
+        if v is None: v=self.x_val
+        x = np.zeros(len(v))
+        for i,num in enumerate(v):
+            if (num >=4. and num <=6.): x[i]=1
+        return x
