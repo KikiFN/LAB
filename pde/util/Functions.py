@@ -47,10 +47,11 @@ class Functions:
         curve = [ v[a] - (self.coefficient)*(v[b]-v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         return np.asarray(curve)
     
-    def get_gaussian(self,a=None,b=None):
+    def get_gaussian(self,a=None,b=None,ctype=None):
         if a == None: a= self.x_val
         if b == None: b= pr.x0
-        return np.exp(-np.power(a-(b),2))
+        if ctype == "1D": return (1/2)*(np.exp(-np.power(a-(b-pr.deltat),2))) + (1/2)*(np.exp(-np.power(a-(b+pr.deltat),2)))
+        else: return np.exp(-np.power(a-(b),2))
     
     def initialize_arrays(self,n):
         arr_list = []
@@ -64,14 +65,17 @@ class Functions:
         curve = [ (0.5*(v[a]+v[b])) - ((self.coefficient)*(v[a]-v[b])) for a,b in zip(self.jmax,self.jmin)]
         return np.asarray(curve)
     
-    def laxwendroff(self,v=None):
+    def laxwendroff(self,v=None,ctype=None):
         if v is None: v= self.get_gaussian()
         second_coeff = (np.power(pr.a,2)*np.power(pr.deltat,2))/(2*np.power(pr.deltax,2))
         curve = [ v[a] - ((self.coefficient)*(v[b]-v[c])) + (second_coeff)*(v[b]-(2*v[a])+v[c]) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         return np.asarray(curve)
     
-    def leapfrog(self,v,w):
-        curve = [ (v[a] - ((2*self.coefficient)*(w[b]-w[c]))) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+    def leapfrog(self,v,w,ctype=None): #v u0 w u
+        if ctype == "1D":
+            curve = [ (2*w[a] - v[a] + self.coeff1D*(w[b] - 2*w[a] + w[c])) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+        else:
+            curve = [ (v[a] - ((2*self.coefficient)*(w[b]-w[c]))) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         return np.asarray(curve)
 
     def pre_plot(self,n):

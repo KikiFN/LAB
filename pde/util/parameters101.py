@@ -21,6 +21,15 @@ selected_entries = {
     400:20
 }
 
+selected_entries_1D = {
+    60:3,
+    100:5,
+    160:8,
+    200:10,
+    300:15,
+    400:20
+}
+
 error_entries = {
     200:10,
     400:20
