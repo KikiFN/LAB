@@ -19,11 +19,13 @@ class Functions:
             return a,b,c
 
         self.x_val = np.arange(0,pr.L,pr.deltax)
+        self.t_val = np.arange(0,20+pr.deltat,pr.deltat) 
         self.LEN = len(self.x_val)
         self.j,self.jmin,self.jmax = _indexes()
         
         self.coefficient = (pr.a*pr.deltat)/(2*pr.deltax)
-        self.coeff1D = (((pr.v**2)*(pr.deltat**2))/(pr.deltax**2))
+        self.coeff1D_LP = (((pr.v**2)*(pr.deltat**2))/(pr.deltax**2))
+        self.coeff1D_LW = (np.power(pr.a,2)*np.power(pr.deltat,2)/(2*np.power(pr.deltax,2)))
         
 
     def _get_norm(self,v):
@@ -73,7 +75,7 @@ class Functions:
     
     def leapfrog(self,v,w,ctype=None): #v u0 w u
         if ctype == "1D":
-            curve = [ (2*w[a] - v[a] + self.coeff1D*(w[b] - 2*w[a] + w[c])) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+            curve = [ (2*w[a] - v[a] + self.coeff1D_LP*(w[b] - 2*w[a] + w[c])) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         else:
             curve = [ (v[a] - ((2*self.coefficient)*(w[b]-w[c]))) for a,b,c in zip(self.j,self.jmax,self.jmin)]
         return np.asarray(curve)
@@ -107,3 +109,13 @@ class Functions:
         for i,num in enumerate(v):
             if (num >=4. and num <=6.): x[i]=1
         return x
+    
+    def wendroff_rs_100(self,a,t,b,X=None,Y=None):
+        if t==0:
+            r = -2*np.exp(-np.power(a-t-b,2))*(a-t-b)
+            s = 0
+        else:
+            r = [ (X[a] + self.coefficient*(Y[b]-Y[c]) + self.coeff1D_LW*(X[b]-(2*X[a])+[X[c]])) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+            s = [ (Y[a] + self.coefficient*(X[b]-X[c]) + self.coeff1D_LW*(Y[b]-(2*Y[a])+[Y[c]])) for a,b,c in zip(self.j,self.jmax,self.jmin)]
+            
+        return r,s
