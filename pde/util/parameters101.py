@@ -1,15 +1,10 @@
 import numpy as np
 
-#common
-
 a=1
 x0=5
 L=10
 J=101
 cf=0.5
-
-#1D
-v=1
 
 deltax= L/(J-1)
 deltat= (deltax * cf)/a
@@ -21,6 +16,14 @@ selected_entries = {
     400:20
 }
 
+error_entries = {
+    600:10,
+    1200:20
+}
+
+#1D
+v=1
+
 selected_entries_1D = {
     60:3,
     100:5,
@@ -30,10 +33,7 @@ selected_entries_1D = {
     400:20
 }
 
-error_entries = {
-    200:10,
-    400:20
-}
+
 
 #VECTORS
 
