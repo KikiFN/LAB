@@ -1,4 +1,5 @@
 from util.Functions import *
+from FTCS import *
 from LAXWENDROFF import err as lwerr
 from LAXFRIED import err as lferr
 from LEAPFROG import err as lperr

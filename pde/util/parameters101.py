@@ -17,8 +17,8 @@ selected_entries = {
 }
 
 error_entries = {
-    600:10,
-    1200:20
+    200:10,
+    400:20
 }
 
 #1D
